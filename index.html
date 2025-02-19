@@ -4,7 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Do Not Touch My Phone</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -13,6 +36,51 @@
         <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
         <p id="status">Monitoring is off</p>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        let isMonitoring = false;
+        const alertSound = document.getElementById('alertSound');
+        const statusText = document.getElementById('status');
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            isMonitoring = !isMonitoring;
+            if (isMonitoring) {
+                startMonitoring();
+                statusText.textContent = "Monitoring is on";
+            } else {
+                stopMonitoring();
+                statusText.textContent = "Monitoring is off";
+            }
+        });
+
+        function startMonitoring() {
+            window.addEventListener('devicemotion', handleMotion);
+        }
+
+        function stopMonitoring() {
+            window.removeEventListener('devicemotion', handleMotion);
+        }
+
+        function handleMotion(event) {
+            const x = event.acceleration.x;
+            const y = event.acceleration.y;
+            const z = event.acceleration.z;
+
+            // Check for significant movement (adjust threshold as needed)
+            const threshold = 10; // Adjust this value based on your needs
+            if (Math.abs(x) > threshold || Math.abs(y) > threshold || Math.abs(z) > threshold) {
+                playAudio();
+            }
+        }
+
+        function playAudio() {
+            if (!alertSound.paused) {
+                alertSound.currentTime = 0; // Reset sound to start
+            }
+            alertSound.play().catch(error => {
+                console.error('Error playing audio:', error);
+            });
+        }
+    </script>
 </body>
 </html>
